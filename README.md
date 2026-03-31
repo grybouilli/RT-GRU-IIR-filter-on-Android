@@ -198,7 +198,7 @@ Project Link: [https://github.com/grybouilli/RT-lowpass-filter-on-Android](https
 [issues-shield]: https://img.shields.io/github/issues/grybouilli/RT-lowpass-filter-on-Android.svg?style=for-the-badge
 [issues-url]: https://github.com/grybouilli/RT-lowpass-filter-on-Android/issues
 [license-shield]: https://img.shields.io/github/license/grybouilli/RT-lowpass-filter-on-Android.svg?style=for-the-badge
-[license-url]: https://github.com/grybouilli/RT-lowpass-filter-on-Android/blob/master/LICENSE.md
+[license-url]: https://github.com/grybouilli/RT-lowpass-filter-on-Android/blob/main/LICENSE.md
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://linkedin.com/in/nicolas-gry
 [product-screenshot]: images/screenshot.png
