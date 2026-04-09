@@ -22,7 +22,7 @@
 template<IsIRRGRUInfo IRRGRU>
 class GRUBinding {
 public:
-    GRUBinding(Ort::Session& session, const IRRGRU& gru, float fc_normed)
+    GRUBinding(Ort::Session& session, const IRRGRU& gru, const float fc_normed)
         : m_session   { session }
         , m_gru       { gru }
         , m_fc_normed { fc_normed }
@@ -137,6 +137,13 @@ public:
         return true;
     }
 
+    void set_normed_fc(const float nfc) { 
+        m_fc_normed = nfc; 
+        const auto B = m_gru.buffer_size();
+        for (size_t i = 0; i < static_cast<size_t>(B); ++i) {
+            m_x_data[i * 2 + 1] = nfc;  // fc    — constant
+        }
+    }
     // Convenience accessors (e.g. for recording)
     const float* output_ptr()  const { return m_output.data(); }
     size_t        output_size() const { return m_output.size(); }

@@ -20,14 +20,18 @@
 template<IsIRRGRUInfo IRRGRU>
 class Player : public oboe::AudioStreamDataCallback {
 public:
+    bool debug;
+    bool profiling;
+
+public:
     Player(
         const IRRGRU&  gru,
         const float    fc_normed,
         int32_t        sample_rate,
         int32_t        channels,
         audio_buffer&  buffer,
-        const bool     debug = false,
-        const bool     profiling = false
+        const bool     dbg = false,
+        const bool     prflg = false
     )
         : m_sample_rate    { sample_rate }
         , m_channels       { channels }
@@ -36,8 +40,8 @@ public:
         // GRUBinding is constructed after the session so we can pass the session ref
         , m_gru_binding    { m_session_handle.session(), gru, fc_normed }
         , m_expected_frames { static_cast<int32_t>(gru.buffer_size()) }
-        , m_debug { debug }
-        , m_profiling { profiling }
+        , debug { dbg }
+        , profiling { prflg }
     {
         printf("normed frequency is %f\n", fc_normed);
     }
@@ -65,7 +69,7 @@ public:
 
         bool ret;
         decltype(std::chrono::high_resolution_clock::now()) start, end;
-        if(m_profiling)
+        if(profiling)
         {
             start = std::chrono::high_resolution_clock::now();
         }
@@ -73,12 +77,12 @@ public:
         // Run inference — writes filtered samples back into `out` in-place
         ret = m_gru_binding.run(out, out);
 
-        if(m_profiling)
+        if(profiling)
         {
             end = std::chrono::high_resolution_clock::now();
             m_recorded_performances.push_back(duration_cast<milliseconds>(end-start).count());
         }
-        if(ret && m_debug){
+        if(ret && debug){
             // Record output for offline dump
             m_recorded_signal.insert(
                 m_recorded_signal.end(),
@@ -89,6 +93,8 @@ public:
 
         return oboe::DataCallbackResult::Continue;
     }
+
+    void set_normed_fc(const float nfc) { m_gru_binding.set_normed_fc(nfc); }
 
     void dump_debug(const std::string& filename)
     {
@@ -116,9 +122,7 @@ private:
 
     int32_t              m_expected_frames;
 
-    bool                m_debug;
     std::vector<audio_sample_t> m_recorded_signal;
     
-    bool                m_profiling;
     std::vector<double>  m_recorded_performances;
 };
