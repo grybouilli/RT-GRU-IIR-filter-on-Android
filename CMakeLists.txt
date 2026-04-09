@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(SOURCE_FILES src/main.cpp ../oboe_boilerplates/acquire_audio_stream.cpp)
 
 include(cmake/liboboe.cmake)
-include(cmake/StaticONNXRuntime.cmake)
+include(cmake/DynamicONNXRuntime.cmake)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 
