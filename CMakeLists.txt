@@ -7,6 +7,7 @@ set(SOURCE_FILES src/main.cpp src/App.cpp ../oboe_boilerplates/acquire_audio_str
 include(cmake/liboboe.cmake)
 include(cmake/DynamicONNXRuntime.cmake)
 include(cmake/cxxopts.cmake)
+include(cmake/magic_enum.cmake)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 
@@ -23,4 +24,5 @@ target_link_libraries(
     PRIVATE log
     PRIVATE Ort::Ort
     PRIVATE cxxopts::cxxopts
+    PRIVATE magic_enum::magic_enum
 )
