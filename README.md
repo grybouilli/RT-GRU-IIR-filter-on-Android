@@ -30,7 +30,7 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <a href="https://github.com/grybouilli/RT-lowpass-filter-on-Android">
+  <a href="https://github.com/grybouilli/RT-GRU-IRR-filter-on-Android">
     <!-- <img src="images/logo.png" alt="Logo" width="80" height="80"> -->
   </a>
 
@@ -39,14 +39,14 @@
   <p align="center">
     A GRU-based IIR filter applied to real-time audio on Android using liboboe and ONNX RT 
     <br />
-    <a href="https://github.com/grybouilli/RT-lowpass-filter-on-Android"><strong>Explore the docs »</strong></a>
+    <a href="https://github.com/grybouilli/RT-GRU-IRR-filter-on-Android"><strong>Explore the docs »</strong></a>
     <br />
     <br />
-    <a href="https://github.com/grybouilli/RT-lowpass-filter-on-Android">View Demo</a>
+    <a href="https://github.com/grybouilli/RT-GRU-IRR-filter-on-Android">View Demo</a>
     &middot;
-    <a href="https://github.com/grybouilli/RT-lowpass-filter-on-Android/issues/new?labels=bug&template=bug-report---.md">Report Bug</a>
+    <a href="https://github.com/grybouilli/RT-GRU-IRR-filter-on-Android/issues/new?labels=bug&template=bug-report---.md">Report Bug</a>
     &middot;
-    <a href="https://github.com/grybouilli/RT-lowpass-filter-on-Android/issues/new?labels=enhancement&template=feature-request---.md">Request Feature</a>
+    <a href="https://github.com/grybouilli/RT-GRU-IRR-filter-on-Android/issues/new?labels=enhancement&template=feature-request---.md">Request Feature</a>
   </p>
 </div>
 
@@ -106,7 +106,7 @@ Fetched by cmake :
 ### Building
 After installing the android ndk at `/path/to/ndk`, you clone the repo and build with cmake :
 ```sh
-git clone https://github.com/grybouilli/RT-lowpass-filter-on-Android
+git clone https://github.com/grybouilli/RT-GRU-IRR-filter-on-Android
 cmake -B build -DCMAKE_TOOLCHAIN_FILE=/path/to/ndk/build/cmake/android.toolchain.cmake [-GNinja] .
 cmake --build build
 ```
@@ -184,7 +184,7 @@ Usage:
     - [ ] MNN
 - [ ] Multi-thread with [Anira](https://github.com/anira-project/anira)
 
-See the [open issues](https://github.com/grybouilli/RT-lowpass-filter-on-Android/issues) for a full list of proposed features (and known issues).
+See the [open issues](https://github.com/grybouilli/RT-GRU-IRR-filter-on-Android/issues) for a full list of proposed features (and known issues).
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -208,8 +208,8 @@ Don't forget to give the project a star! Thanks again!
 
 ### Top contributors:
 
-<a href="https://github.com/grybouilli/RT-lowpass-filter-on-Android/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=grybouilli/RT-lowpass-filter-on-Android" alt="contrib.rocks image" />
+<a href="https://github.com/grybouilli/RT-GRU-IRR-filter-on-Android/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=grybouilli/RT-GRU-IRR-filter-on-Android" alt="contrib.rocks image" />
 </a>
 
 
@@ -228,7 +228,7 @@ Distributed under the MIT License. See `LICENSE.md` for more information.
 
 Nicolas Gry - grybouilli at outlook.fr - nicolas.gry at inria.fr
 
-Project Link: [https://github.com/grybouilli/RT-lowpass-filter-on-Android](https://github.com/grybouilli/RT-lowpass-filter-on-Android)
+Project Link: [https://github.com/grybouilli/RT-GRU-IRR-filter-on-Android](https://github.com/grybouilli/RT-GRU-IRR-filter-on-Android)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -236,16 +236,16 @@ Project Link: [https://github.com/grybouilli/RT-lowpass-filter-on-Android](https
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/grybouilli/RT-lowpass-filter-on-Android.svg?style=for-the-badge
-[contributors-url]: https://github.com/grybouilli/RT-lowpass-filter-on-Android/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/grybouilli/RT-lowpass-filter-on-Android.svg?style=for-the-badge
-[forks-url]: https://github.com/grybouilli/RT-lowpass-filter-on-Android/network/members
-[stars-shield]: https://img.shields.io/github/stars/grybouilli/RT-lowpass-filter-on-Android.svg?style=for-the-badge
-[stars-url]: https://github.com/grybouilli/RT-lowpass-filter-on-Android/stargazers
-[issues-shield]: https://img.shields.io/github/issues/grybouilli/RT-lowpass-filter-on-Android.svg?style=for-the-badge
-[issues-url]: https://github.com/grybouilli/RT-lowpass-filter-on-Android/issues
-[license-shield]: https://img.shields.io/github/license/grybouilli/RT-lowpass-filter-on-Android.svg?style=for-the-badge
-[license-url]: https://github.com/grybouilli/RT-lowpass-filter-on-Android/blob/main/LICENSE.md
+[contributors-shield]: https://img.shields.io/github/contributors/grybouilli/RT-GRU-IRR-filter-on-Android.svg?style=for-the-badge
+[contributors-url]: https://github.com/grybouilli/RT-GRU-IRR-filter-on-Android/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/grybouilli/RT-GRU-IRR-filter-on-Android.svg?style=for-the-badge
+[forks-url]: https://github.com/grybouilli/RT-GRU-IRR-filter-on-Android/network/members
+[stars-shield]: https://img.shields.io/github/stars/grybouilli/RT-GRU-IRR-filter-on-Android.svg?style=for-the-badge
+[stars-url]: https://github.com/grybouilli/RT-GRU-IRR-filter-on-Android/stargazers
+[issues-shield]: https://img.shields.io/github/issues/grybouilli/RT-GRU-IRR-filter-on-Android.svg?style=for-the-badge
+[issues-url]: https://github.com/grybouilli/RT-GRU-IRR-filter-on-Android/issues
+[license-shield]: https://img.shields.io/github/license/grybouilli/RT-GRU-IRR-filter-on-Android.svg?style=for-the-badge
+[license-url]: https://github.com/grybouilli/RT-GRU-IRR-filter-on-Android/blob/main/LICENSE.md
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://linkedin.com/in/nicolas-gry
 [product-screenshot]: images/screenshot.png
