@@ -176,6 +176,7 @@ Usage:
 - [x] Finish README.md
 - [x] Improve latency
 - [x] Implement Second-Order Lowpass 
+- [ ] Implement modular interface for pluggable inference engine interfaces
 - [ ] Try other inference engines
     - [ ] RTNeural
     - [ ] TF Lite
