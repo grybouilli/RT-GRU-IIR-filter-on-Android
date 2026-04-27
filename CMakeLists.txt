@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.24)
 project(filtered LANGUAGES C CXX)  
 set(CMAKE_CXX_STANDARD 20)            
 
-set(SOURCE_FILES src/main.cpp src/App.cpp ../oboe_boilerplates/acquire_audio_stream.cpp)
+set(SOURCE_FILES src/main.cpp src/App.cpp src/acquire_audio_stream.cpp)
 
 include(cmake/liboboe.cmake)
 include(cmake/DynamicONNXRuntime.cmake)
