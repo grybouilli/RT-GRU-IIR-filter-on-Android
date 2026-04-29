@@ -1,8 +1,8 @@
 #pragma once
 
-#include <GRUInferenceMethods/GRUOrtInference.hpp>
 #include <GRUInferenceMethods/GeneralInferenceParams.hpp>
 #include <GRUInferenceMethods/IEParams.hpp>
+#include <GRUInferenceMethods/Ort/GRUOrtInference.hpp>
 #include <IIRGRUInfo.hpp>
 #include <memory>
 

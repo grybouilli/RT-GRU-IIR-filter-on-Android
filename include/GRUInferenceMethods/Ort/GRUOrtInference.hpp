@@ -2,8 +2,8 @@
 
 #include <GRUInferenceMethods/GRUInferenceMethodBase.hpp>
 #include <GRUInferenceMethods/GeneralInferenceParams.hpp>
-#include <GRUInferenceMethods/OrtSessionHandler.hpp>
-#include <GRUInferenceMethods/OrtTensorBuffer.hpp>
+#include <GRUInferenceMethods/Ort/OrtSessionHandler.hpp>
+#include <GRUInferenceMethods/Ort/OrtTensorBuffer.hpp>
 
 template <IsIIRGRUInfo IIRGRU>
 class GRUOrtInference final : public GRUInferenceMethodBase<IIRGRU> {
