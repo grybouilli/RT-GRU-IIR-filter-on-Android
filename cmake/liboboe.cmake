@@ -1,5 +1,7 @@
 include(FetchContent)
 
+set(TMP_BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS})
+set(BUILD_SHARED_LIBS OFF)
 FetchContent_Declare(
     oboe
     GIT_REPOSITORY https://github.com/google/oboe
@@ -7,3 +9,5 @@ FetchContent_Declare(
 )
 
 FetchContent_MakeAvailable(oboe)
+
+set(BUILD_SHARED_LIBS ${TMP_BUILD_SHARED_LIBS})

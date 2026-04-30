@@ -2,11 +2,11 @@ include(FetchContent)
 
 # ── Configuration ──────────────────────────────────────────────────────────────
 if(ONNX_USE_QNN)
-    set(ONXX_RT_URL      "https://repo1.maven.org/maven2/com/microsoft/onnxruntime/onnxruntime-android-qnn/1.25.0/onnxruntime-android-qnn-1.25.0.aar")
+    set(ONXX_RT_URL      "https://repo1.maven.org/maven2/com/microsoft/onnxruntime/onnxruntime-android-qnn/1.20.0/onnxruntime-android-qnn-1.20.0.aar")
     set(ONXX_RT_SHA256   "397277c3e50326f5972409ca42ab5b4e69172b218557923630d68e55b11d6198") 
 else()
-    set(ONXX_RT_URL      "https://repo1.maven.org/maven2/com/microsoft/onnxruntime/onnxruntime-android/1.24.2/onnxruntime-android-1.24.2.aar")
-    set(ONXX_RT_SHA256   "bc461499a735653dff285a6a3477d28b9cfd119a09c7753eaf003426b577f223") 
+    set(ONXX_RT_URL      "https://repo1.maven.org/maven2/com/microsoft/onnxruntime/onnxruntime-android/1.19.2/onnxruntime-android-1.19.2.aar")
+    set(ONXX_RT_SHA256   "84737dd1fdb715f0ee695c0a9864f6949b66ecb4c46ca733bc9211bf0c2a7b5f") 
 endif()
 set(ONXX_RT_NAME     "onnxruntime")     # Name used internally by FetchContent
 

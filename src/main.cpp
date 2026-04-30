@@ -51,20 +51,31 @@ int main(int argc, char** argv) {
 
     gparams.model_filename = args["model"].as<std::string>();
     gparams.debug_mode_on  = args["debug"].as<bool>();
+    gparams.Fc_normed =
+        normalize_frequency((float)args["fc"].as<int32_t>(), 48000.f);
 
+    std::cout << std::format("normed cut off freq = {}", gparams.Fc_normed)
+              << std::endl;
     auto chosen_engine = args["inference_engine"].as<std::string>();
 
     if (chosen_engine == "Ort") {
         OrtParams ort_params;
         ort_params.EP_name = args["ep"].as<std::string>();
-        ort_params.Fc_normed =
-            normalize_frequency((float)args["fc"].as<int32_t>(), 48000.f);
 
-        std::cout << std::format("normed cut off freq = {}",
-                                 ort_params.Fc_normed)
-                  << std::endl;
         gparams.chosen_engine = SupportedInferenceEngines::Ort;
         App app(args, gparams, ort_params, run);
+
+        app.run();
+        return EXIT_SUCCESS;
+    }
+
+    if (chosen_engine == "Anira_with_Ort") {
+        AniraParams anira_params;
+        anira_params.backend       = "Ort";
+        anira_params.model_latency = 50.f;
+
+        gparams.chosen_engine = SupportedInferenceEngines::Anira_with_Ort;
+        App app(args, gparams, anira_params, run);
 
         app.run();
         return EXIT_SUCCESS;

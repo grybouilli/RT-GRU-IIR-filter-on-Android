@@ -11,6 +11,11 @@ include(cmake/DynamicONNXRuntime.cmake)
 include(cmake/cxxopts.cmake)
 include(cmake/magic_enum.cmake)
 
+set(ANIRA_WITH_TFLITE OFF)
+set(ANIRA_WITH_LIBTORCH OFF)
+
+add_subdirectory(modules/anira)
+
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 
 target_include_directories(
@@ -24,9 +29,9 @@ target_link_libraries(
     ${PROJECT_NAME}
     PRIVATE oboe
     PRIVATE log
-    PRIVATE Ort::Ort
     PRIVATE cxxopts::cxxopts
     PRIVATE magic_enum::magic_enum
+    PRIVATE anira
 )
 
 target_link_options(${PROJECT_NAME} PRIVATE -Wl,--allow-shlib-undefined)
