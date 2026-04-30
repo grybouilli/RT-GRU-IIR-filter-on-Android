@@ -33,9 +33,8 @@ class Player : public oboe::AudioStreamDataCallback {
            int32_t                      sample_rate,
            int32_t                      channels,
            audio_buffer&                buffer,
-           const bool                   cpu_only = false,
-           const bool                   dbg      = false,
-           const bool                   prflg    = false) :
+           const bool                   dbg   = false,
+           const bool                   prflg = false) :
         m_sample_rate{sample_rate},
         m_channels{channels},
         m_buffer{buffer},

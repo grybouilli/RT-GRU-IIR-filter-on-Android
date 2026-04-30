@@ -15,10 +15,11 @@ class AniraGRUInference final : public GRUInferenceMethodBase<IIRGRU> {
                       const GeneralInferenceParams gparams,
                       const AniraParams&           ieparams) :
         GRUInferenceMethodBase<IIRGRU>(gru, gparams, ieparams),
+        m_chosen_backend{
+            magic_enum::enum_cast<anira::InferenceBackend>(ieparams.backend)
+                .value_or(anira::InferenceBackend::ONNX)},
         m_inference_config(
-            {{gparams.model_filename,
-              magic_enum::enum_cast<anira::InferenceBackend>(ieparams.backend)
-                  .value_or(anira::InferenceBackend::ONNX)}},
+            {{gparams.model_filename, m_chosen_backend}},
             {anira::TensorShape(
                 {{gru.batch_size(), gru.buffer_size(), gru.input_size()},
                  {gru.num_layers(), gru.batch_size(), gru.hidden_size()}},
@@ -48,7 +49,8 @@ class AniraGRUInference final : public GRUInferenceMethodBase<IIRGRU> {
             {static_cast<float>(gru.buffer_size()), 48000.f});
         m_inference_handler.set_inference_backend(
             anira::InferenceBackend::ONNX);
-        printf("AniraGRUInference class initialized\n");
+        printf("AniraGRUInference class initialized with latency set to %f\n",
+               ieparams.model_latency);
     }
 
     bool run(float* audio_data, const size_t num_samples) override {
@@ -58,6 +60,7 @@ class AniraGRUInference final : public GRUInferenceMethodBase<IIRGRU> {
     }
 
    private:
+    anira::InferenceBackend m_chosen_backend;
     anira::InferenceConfig  m_inference_config;
     PrePostGRUProcessor     m_pp_processor;
     anira::InferenceHandler m_inference_handler;

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-enum class SupportedInferenceEngines { Ort, Anira_with_Ort };
+enum class SupportedInferenceEngines { Ort, Anira };
 
 struct GeneralInferenceParams {
     std::string               model_filename;

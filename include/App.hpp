@@ -37,8 +37,7 @@ class App {
                  ieparams,
                  m_stream_handler.get_out_sr(),
                  1,
-                 m_audio_buffer,
-                 args["cpu_only"].as<bool>()},
+                 m_audio_buffer},
         m_run_duration{-1} {
         parse_options(args);
 

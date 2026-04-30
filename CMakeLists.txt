@@ -6,15 +6,16 @@ set(SOURCE_FILES src/main.cpp src/App.cpp src/acquire_audio_stream.cpp)
 
 option(ONNX_USE_QNN "Will fetch a version of Onnx Runtime that only supports QNN and CPU" OFF)
 
+set(ANIRA_WITH_TFLITE OFF)
+set(ANIRA_WITH_LIBTORCH OFF)
+add_subdirectory(modules/anira)
+
 include(cmake/liboboe.cmake)
 include(cmake/DynamicONNXRuntime.cmake)
 include(cmake/cxxopts.cmake)
 include(cmake/magic_enum.cmake)
-
-set(ANIRA_WITH_TFLITE OFF)
-set(ANIRA_WITH_LIBTORCH OFF)
-
-add_subdirectory(modules/anira)
+include(cmake/nlohmann_json.cmake)
+include(cmake/boost_pfr.cmake)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 
@@ -32,6 +33,8 @@ target_link_libraries(
     PRIVATE cxxopts::cxxopts
     PRIVATE magic_enum::magic_enum
     PRIVATE anira
+    PRIVATE nlohmann_json::nlohmann_json
+    PRIVATE Boost::pfr
 )
 
 target_link_options(${PROJECT_NAME} PRIVATE -Wl,--allow-shlib-undefined)
