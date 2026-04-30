@@ -2,20 +2,20 @@
 
 #include <GRUInferenceMethods/GRUInferenceMethodBase.hpp>
 #include <GRUInferenceMethods/GeneralInferenceParams.hpp>
-#include <GRUInferenceMethods/OrtSessionHandler.hpp>
-#include <GRUInferenceMethods/OrtTensorBuffer.hpp>
+#include <GRUInferenceMethods/Ort/OrtSessionHandler.hpp>
+#include <GRUInferenceMethods/Ort/OrtTensorBuffer.hpp>
 
 template <IsIIRGRUInfo IIRGRU>
-class GRUOrtInference final : public GRUInferenceMethodBase<IIRGRU> {
+class OrtGRUInference final : public GRUInferenceMethodBase<IIRGRU> {
    public:
-    GRUOrtInference(const IIRGRU&                gru,
+    OrtGRUInference(const IIRGRU&                gru,
                     const GeneralInferenceParams gparams,
                     const OrtParams&             ieparams) :
         GRUInferenceMethodBase<IIRGRU>(gru, gparams, ieparams),
         m_session_handler{gparams.model_filename,
                           ieparams.EP_name,
                           gparams.debug_mode_on},
-        m_fc_normed{ieparams.Fc_normed},
+        m_fc_normed{gparams.Fc_normed},
         m_memory_info{
             Ort::MemoryInfo::CreateCpu(OrtArenaAllocator, OrtMemTypeDefault)},
         m_binding{m_session_handler.session()},
@@ -46,12 +46,13 @@ class GRUOrtInference final : public GRUInferenceMethodBase<IIRGRU> {
         m_hidden_ping = 0;  // index of current hidden_in buffer
     }
 
-    bool run(const float* audio_in, float* audio_out) override {
-        static const size_t B = static_cast<size_t>(m_gru.buffer_size());
+    bool run(float* audio, const size_t num_samples) override {
+        static const size_t B       = static_cast<size_t>(m_gru.buffer_size());
+        const auto          samples = std::min(num_samples, B);
 
         // Fill audio channel of x with new input values
-        for (size_t i = 0; i < B; ++i)
-            m_x_data.buffer_memory[i * 2] = audio_in[i];
+        for (size_t i = 0; i < samples; ++i)
+            m_x_data.buffer_memory[i * 2] = audio[i];
 
         // Swap hidden ping-pong:
         const int pong = 1 - m_hidden_ping;
@@ -68,9 +69,9 @@ class GRUOrtInference final : public GRUInferenceMethodBase<IIRGRU> {
 
         m_hidden_ping = pong;
 
-        std::memcpy(audio_out,
+        std::memcpy(audio,
                     m_output.buffer_memory.data(),
-                    B * sizeof(float));
+                    samples * sizeof(float));
 
         return true;
     }

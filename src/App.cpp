@@ -46,12 +46,6 @@ void App::parse_options(const cxxopts::ParseResult& args) {
         printf("Run duration : %d seconds\n", m_run_duration);
     }
 
-    bool cpu_only = false;
-    if (args.count("cpu_only") > 0) {
-        cpu_only = args["cpu_only"].as<int>();
-    }
-    printf("CPU only : %s \n", cpu_only ? "yes" : "no");
-
     m_player.debug     = debug;
     m_player.profiling = profiling;
 }

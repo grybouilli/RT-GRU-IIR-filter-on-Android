@@ -133,27 +133,27 @@ adb shell
 Usage : 
 ```shell
 Usage:
-  ./filtered [...]
-  FilterProgram 
- [OPTION...]
+  filtered [OPTION...]
 
-  -h, --help              Print usage
-  -m, --model arg         File containing the model to load (expected .onnx 
-                          file) (default: ./lowpass_rnn.onnx)
-  -f, --fc arg            Cutoff frequency (Hz)
-  -p, --profiling         Profiling mode : get information about session 
-                          perfomance (boolean)
-  -r, --run_duration arg  Run duration (seconds): indicate of much time to 
-                          run the program (if not specified, the program 
-                          runs until stopped with Ctrl+C)
-  -d, --debug             Debug mode : get session input and output signals 
-                          (boolean)
-  -e, --ep arg            Execution Provider selection. Availble EPs are : 
-                          NnapiExecutionProvider, WebGpuExecutionProvider, 
-                          XnnpackExecutionProvider, CPUExecutionProvider 
-                          (default: XnnpackExecutionProvider)
-  -c, --cpu_only          CPU only mode : NNAPI will not try to run 
-                          inference on GPU/NPU (boolean)
+  -h, --help                  Print usage
+  -m, --model arg             File containing the model to load (expected 
+                              .onnx file) (default: ./lowpass_rnn.onnx)
+  -f, --fc arg                Cutoff frequency (Hz)
+  -p, --profiling             Profiling mode : get information about 
+                              session perfomance (boolean)
+  -r, --run_duration arg      Run duration (seconds): indicate of much time 
+                              to run the program (if not specified, the 
+                              program runs until stopped with Ctrl+C)
+  -d, --debug                 Debug mode : get session input and output 
+                              signals (boolean)
+  -i, --inference_engine arg  Inference engine (IE) choice. Availble IEs 
+                              are : Ort (default: Ort)
+  -o, --options arg           Inference Engine options (json string) : 
+                              Ort -> {"EP_name": string }
+                              Anira -> {"backend": ONNX, "model_latency": 
+                              float }
+                               (default: {"EP_name": "XNNPACK" })
+
 ```
 
 <!-- ROADMAP -->

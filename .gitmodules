@@ -1,0 +1,4 @@
+[submodule "modules/anira"]
+	path = modules/anira
+	url = https://github.com/grybouilli/anira/
+	branch = feat/support_android-onnx

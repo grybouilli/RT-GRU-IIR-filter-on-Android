@@ -1,12 +1,44 @@
 #include <App.hpp>
+#include <boost/pfr.hpp>
+#include <nlohmann/json.hpp>
 
 std::atomic<bool> run = true;
 
 void sigint_handler(int arg) { run = false; }
 
+template <typename IEParams>
+void fill_params_from_args(IEParams& params, const std::string args) {
+    using json = nlohmann::json;
+
+    json params_json = json::parse(args);
+
+    boost::pfr::for_each_field(params, [&](auto& field, auto idx) {
+        constexpr auto field_name = boost::pfr::get_name<idx, IEParams>();
+        if (params_json.contains(field_name)) {
+            field =
+                params_json[field_name]
+                    .template get<std::remove_reference_t<decltype(field)>>();
+        }
+    });
+}
+
+template <typename IEParams>
+int runApp(const cxxopts::ParseResult&     args,
+           GeneralInferenceParams&         gparams,
+           const SupportedInferenceEngines engine) {
+    IEParams params;
+    fill_params_from_args(params, args["options"].as<std::string>());
+
+    gparams.chosen_engine = engine;
+    App app(args, gparams, params, run);
+
+    app.run();
+    return EXIT_SUCCESS;
+}
+
 int main(int argc, char** argv) {
     signal(SIGINT, sigint_handler);
-    cxxopts::Options options{"FilterProgram",
+    cxxopts::Options options{"filtered",
                              "Audio passing through filter program"};
 
     options.add_options()("h,help", "Print usage")(
@@ -30,16 +62,12 @@ int main(int argc, char** argv) {
         "Inference engine (IE) choice. Availble IEs are : "
         "Ort",
         cxxopts::value<std::string>()->default_value("Ort"))(
-        "e,ep",
-        "Execution Provider selection. Availble EPs are : "
-        "NnapiExecutionProvider, WebGpuExecutionProvider, "
-        "XnnpackExecutionProvider, CPUExecutionProvider",
+        "o,options",
+        "Inference Engine options (json string) : \n"
+        "Ort -> {\"EP_name\": string }\n"
+        "Anira -> {\"backend\": ONNX, \"model_latency\": float }\n",
         cxxopts::value<std::string>()->default_value(
-            "XnnpackExecutionProvider"))(
-        "c,cpu_only",
-        "CPU only mode : NNAPI will not try to run inference on GPU/NPU "
-        "(boolean)",
-        cxxopts::value<bool>()->default_value("false"));
+            R"({"EP_name": "XNNPACK" })"));
 
     auto args = options.parse(argc, argv);
 
@@ -51,22 +79,24 @@ int main(int argc, char** argv) {
 
     gparams.model_filename = args["model"].as<std::string>();
     gparams.debug_mode_on  = args["debug"].as<bool>();
+    gparams.Fc_normed =
+        normalize_frequency((float)args["fc"].as<int32_t>(), 48000.f);
 
+    std::cout << std::format("normed cut off freq = {}", gparams.Fc_normed)
+              << std::endl;
     auto chosen_engine = args["inference_engine"].as<std::string>();
 
-    if (chosen_engine == "Ort") {
-        OrtParams ort_params;
-        ort_params.EP_name = args["ep"].as<std::string>();
-        ort_params.Fc_normed =
-            normalize_frequency((float)args["fc"].as<int32_t>(), 48000.f);
+    constexpr std::array possible_engines = {"Ort", "Anira"};
 
-        std::cout << std::format("normed cut off freq = {}",
-                                 ort_params.Fc_normed)
-                  << std::endl;
-        gparams.chosen_engine = SupportedInferenceEngines::Ort;
-        App app(args, gparams, ort_params, run);
+    if (chosen_engine ==
+        possible_engines[(size_t)SupportedInferenceEngines::Ort]) {
+        return runApp<OrtParams>(args, gparams, SupportedInferenceEngines::Ort);
+    }
 
-        app.run();
-        return EXIT_SUCCESS;
+    if (chosen_engine ==
+        possible_engines[(size_t)SupportedInferenceEngines::Anira]) {
+        return runApp<AniraParams>(args,
+                                   gparams,
+                                   SupportedInferenceEngines::Anira);
     }
 }

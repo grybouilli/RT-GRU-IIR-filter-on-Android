@@ -1,7 +1,6 @@
 #pragma once
 
 #include <cpu_provider_factory.h>
-// #include <nnapi_provider_factory.h>
 #include <onnxruntime_cxx_api.h>
 
 #include <iostream>
@@ -36,7 +35,7 @@ class OrtSessionHandler {
             std::cout << ep_name << " registered" << std::endl;
         } catch (const Ort::Exception& e) {
             std::cout << "Exception caught : " << e.what() << std::endl;
-            m_session_options.AppendExecutionProvider_CPU(1);
+            m_session_options.AppendExecutionProvider("CPUExecutionProvider");
             std::cout << "Falling back to "
                       << magic_enum::enum_name(
                              SupportedEPs::CPUExecutionProvider)

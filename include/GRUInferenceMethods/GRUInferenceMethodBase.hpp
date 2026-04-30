@@ -13,7 +13,8 @@ class GRUInferenceMethodBase {
                                     const IEParams&              ieparams) :
         m_gru{gru} {}
 
-    virtual bool run(const float* audio_in, float* audio_out) = 0;
+    virtual ~GRUInferenceMethodBase() {}
+    virtual bool run(float* audio, const size_t samples) = 0;
 
    protected:
     IIRGRU m_gru;

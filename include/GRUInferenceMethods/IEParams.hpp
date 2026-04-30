@@ -5,5 +5,9 @@
 
 struct OrtParams {
     std::string EP_name;
-    float       Fc_normed;
+};
+
+struct AniraParams {
+    std::string backend;
+    float       model_latency;
 };
