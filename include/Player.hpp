@@ -69,29 +69,45 @@ class Player : public oboe::AudioStreamDataCallback {
         if (profiling) {
             start = std::chrono::high_resolution_clock::now();
         }
-
+        if (debug) {
+            m_timestamps.push_back(
+                std::chrono::duration<double>(
+                    std::chrono::steady_clock::now().time_since_epoch())
+                    .count());
+        }
         // Run inference - writes filtered samples back into `out` in-place
         ret = m_gru_binding.run(out, num_samples);
 
         if (profiling) {
             end = std::chrono::high_resolution_clock::now();
             m_recorded_performances.push_back(
-                duration_cast<milliseconds>(end - start).count());
+                std::chrono::duration<double, std::milli>(end - start).count());
         }
-        if (ret && debug) {
+        if (debug) {
             // Record output for offline dump
             m_recorded_signal.insert(m_recorded_signal.end(),
                                      out,
                                      out + num_samples);
+            m_timestamps.push_back(
+                std::chrono::duration<double>(
+                    std::chrono::steady_clock::now().time_since_epoch())
+                    .count());
         }
 
         return oboe::DataCallbackResult::Continue;
     }
 
-    void dump_debug(const std::string& filename) {
+    void dump_debug_output(const std::string& filename) {
         npy::npy_data<audio_sample_t> d;
         d.data  = m_recorded_signal;
         d.shape = {m_recorded_signal.size()};
+        npy::write_npy(filename, d);
+    }
+
+    void dump_debug_timestamps(const std::string& filename) {
+        npy::npy_data<double> d;
+        d.data  = m_timestamps;
+        d.shape = {m_timestamps.size()};
         npy::write_npy(filename, d);
     }
 
@@ -114,4 +130,5 @@ class Player : public oboe::AudioStreamDataCallback {
     std::vector<audio_sample_t> m_recorded_signal;
 
     std::vector<double> m_recorded_performances;
+    std::vector<double> m_timestamps;
 };

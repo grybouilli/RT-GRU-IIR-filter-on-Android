@@ -10,12 +10,8 @@ class GRUInferenceMethodBase {
     template <typename IEParams>
     explicit GRUInferenceMethodBase(const IIRGRU&                gru,
                                     const GeneralInferenceParams gparams,
-                                    const IEParams&              ieparams) :
-        m_gru{gru} {}
+                                    const IEParams&              ieparams) {}
 
     virtual ~GRUInferenceMethodBase() {}
     virtual bool run(float* audio, const size_t samples) = 0;
-
-   protected:
-    IIRGRU m_gru;
 };

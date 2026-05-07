@@ -112,7 +112,7 @@ cmake --build build
 ```
 
 Notes : 
-* The option `-DONNX_USE_QNN=ON` will make cmake fetch a version of onnx that supports QNN EP ; note that this means the only available EPs will be QNN and CPU ;
+* The option `-DONNX_USE_QNN=ON` will make cmake fetch a version of onnx that supports QNN EP ; note that this means the only available EPs will be QNN and CPU. To use QNN with accelerators, push the
 * The option `-DANDROID_TOOLCHAIN_NAME=aarch64-linux-android-clang` ensures the built binary will be 64 bits. When not specified, Android ndk might default to 32-bit build.  
 ### Running
 
@@ -152,7 +152,7 @@ Usage:
   -i, --inference_engine arg  Inference engine (IE) choice. Availble IEs 
                               are : Ort (default: Ort)
   -o, --options arg           Inference Engine options (json string) : 
-                              Ort -> {"EP_name": string }
+                              Ort -> {"EP_name": string, "EP_options" : null|dict }
                               Anira -> {"backend": ONNX, "model_latency": 
                               float }
                                (default: {"EP_name": "XNNPACK" })

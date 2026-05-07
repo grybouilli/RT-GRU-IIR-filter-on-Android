@@ -14,7 +14,8 @@ class OrtGRUInference final : public GRUInferenceMethodBase<IIRGRU> {
         GRUInferenceMethodBase<IIRGRU>(gru, gparams, ieparams),
         m_session_handler{gparams.model_filename,
                           ieparams.EP_name,
-                          gparams.debug_mode_on},
+                          gparams.debug_mode_on,
+                          ieparams.EP_options},
         m_fc_normed{gparams.Fc_normed},
         m_memory_info{
             Ort::MemoryInfo::CreateCpu(OrtArenaAllocator, OrtMemTypeDefault)},
@@ -47,7 +48,7 @@ class OrtGRUInference final : public GRUInferenceMethodBase<IIRGRU> {
     }
 
     bool run(float* audio, const size_t num_samples) override {
-        static const size_t B       = static_cast<size_t>(m_gru.buffer_size());
+        static const size_t B = static_cast<size_t>(IIRGRU::buffer_size());
         const auto          samples = std::min(num_samples, B);
 
         // Fill audio channel of x with new input values
@@ -78,7 +79,7 @@ class OrtGRUInference final : public GRUInferenceMethodBase<IIRGRU> {
 
     void set_normed_fc(const float nfc) {
         m_fc_normed  = nfc;
-        const auto B = m_gru.buffer_size();
+        const auto B = IIRGRU::buffer_size();
         for (size_t i = 0; i < static_cast<size_t>(B); ++i) {
             m_x_data.buffer_memory[i * 2 + 1] = nfc;  // fc    — constant
         }
@@ -86,7 +87,6 @@ class OrtGRUInference final : public GRUInferenceMethodBase<IIRGRU> {
 
    private:
     OrtSessionHandler m_session_handler;
-    IIRGRU            m_gru;
     float             m_fc_normed;
 
     Ort::MemoryInfo m_memory_info;

@@ -6,6 +6,7 @@
 #include <iostream>
 #include <magic_enum/magic_enum.hpp>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 enum class SupportedEPs {
@@ -18,9 +19,11 @@ enum class SupportedEPs {
 
 class OrtSessionHandler {
    public:
-    OrtSessionHandler(const std::string model_filename,
-                      const std::string ep_name,
-                      const bool        debug = false) :
+    OrtSessionHandler(
+        const std::string                                   model_filename,
+        const std::string                                   ep_name,
+        const bool                                          debug      = false,
+        const std::unordered_map<std::string, std::string>& ep_options = {}) :
         m_env(debug ? ORT_LOGGING_LEVEL_VERBOSE : ORT_LOGGING_LEVEL_FATAL,
               "lowpass_rnn\n") {
         // Lists all providers compiled into your ORT build
@@ -31,7 +34,7 @@ class OrtSessionHandler {
         }
 
         try {
-            m_session_options.AppendExecutionProvider(ep_name);
+            m_session_options.AppendExecutionProvider(ep_name, ep_options);
             std::cout << ep_name << " registered" << std::endl;
         } catch (const Ort::Exception& e) {
             std::cout << "Exception caught : " << e.what() << std::endl;
