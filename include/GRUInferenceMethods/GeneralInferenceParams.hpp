@@ -8,4 +8,5 @@ struct GeneralInferenceParams {
     bool                      debug_mode_on;
     SupportedInferenceEngines chosen_engine;
     float                     Fc_normed;
+    std::string               profiling_file;
 };

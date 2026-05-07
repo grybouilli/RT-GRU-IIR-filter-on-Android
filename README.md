@@ -141,6 +141,9 @@ Usage:
   -f, --fc arg                Cutoff frequency (Hz)
   -p, --profiling             Profiling mode : get information about 
                               session perfomance (boolean)
+  -P, --profiling_data arg    Profiling data file: filename to which to 
+                              write the profiling data - should  be .npy 
+                              extension (string) (default: latency.npy)
   -r, --run_duration arg      Run duration (seconds): indicate of much time 
                               to run the program (if not specified, the 
                               program runs until stopped with Ctrl+C)

@@ -51,6 +51,10 @@ int main(int argc, char** argv) {
         "p,profiling",
         "Profiling mode : get information about session perfomance (boolean)",
         cxxopts::value<bool>()->default_value("false"))(
+        "P,profiling_data",
+        "Profiling data file: filename to which to write the profiling data - "
+        "should  be .npy extension (string)",
+        cxxopts::value<std::string>()->default_value("latency.npy"))(
         "r,run_duration",
         "Run duration (seconds): indicate of much time to run the program (if "
         "not specified, the program runs until stopped with Ctrl+C)",
@@ -60,11 +64,11 @@ int main(int argc, char** argv) {
         cxxopts::value<bool>()->default_value("false"))(
         "i,inference_engine",
         "Inference engine (IE) choice. Availble IEs are : "
-        "Ort",
+        "Ort, Anira",
         cxxopts::value<std::string>()->default_value("Ort"))(
         "o,options",
         "Inference Engine options (json string) : \n"
-        "Ort -> {\"EP_name\": string }\n"
+        "Ort -> {\"EP_name\": string, \"EP_options\" : null|dict }\n"
         "Anira -> {\"backend\": ONNX, \"model_latency\": float }\n",
         cxxopts::value<std::string>()->default_value(
             R"({"EP_name": "XNNPACK" })"));
@@ -81,6 +85,7 @@ int main(int argc, char** argv) {
     gparams.debug_mode_on  = args["debug"].as<bool>();
     gparams.Fc_normed =
         normalize_frequency((float)args["fc"].as<int32_t>(), 48000.f);
+    gparams.profiling_file = args["profiling_data"].as<std::string>();
 
     std::cout << std::format("normed cut off freq = {}", gparams.Fc_normed)
               << std::endl;

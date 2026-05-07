@@ -38,7 +38,8 @@ class App {
                  m_stream_handler.get_out_sr(),
                  1,
                  m_audio_buffer},
-        m_run_duration{-1} {
+        m_run_duration{-1},
+        m_profiling_output_file{gparams.profiling_file} {
         parse_options(args);
 
         m_stream_handler.m_in_builder.setDataCallback(&m_recorder)
@@ -73,4 +74,5 @@ class App {
     Recorder                m_recorder;
     Player<decltype(m_gru)> m_player;
     int                     m_run_duration;
+    std::string             m_profiling_output_file;
 };

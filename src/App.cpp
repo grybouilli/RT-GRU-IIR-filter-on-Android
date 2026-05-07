@@ -4,8 +4,9 @@
 App::~App() {
     m_recorder.dump("input.npy");
 
-    if (m_player.debug) m_player.dump_debug("output.npy");
-    if (m_player.profiling) m_player.dump_profiling("latency.npy");
+    if (m_player.debug) m_player.dump_debug_output("output.npy");
+    if (m_player.debug) m_player.dump_debug_timestamps("timestamps.npy");
+    if (m_player.profiling) m_player.dump_profiling(m_profiling_output_file);
 
     printf("Done.\n");
 }
