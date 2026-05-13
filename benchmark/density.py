@@ -22,11 +22,9 @@ rows = 2
 cols = ep_amount // 2
 fig, axs = plt.subplots(nrows=rows, ncols=cols)
 
-print(f"rows = {rows} cols = {cols}")
 i, j = 0, 0
 idx = 0
 for ep, data in ordered_eps.items():
-    print(f"plot {i} {j}")
     ax = axs[j, i]
     ax.hist(data, label="ep", color=colors[idx], bins="auto", density=True, alpha=0.45)
 
@@ -37,7 +35,6 @@ for ep, data in ordered_eps.items():
     ax.set_xlabel("latency (ms)")
     ax.set_ylabel("Probability of occurence")
 
-    print(f"plot {i} {j} done")
     i = (i + 1) % cols
     j = j + 1 if i == 0 else j
     idx += 1
