@@ -5,6 +5,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(SOURCE_FILES src/main.cpp src/App.cpp src/acquire_audio_stream.cpp)
 
 option(ONNX_USE_QNN "Will fetch a version of Onnx Runtime that only supports QNN and CPU" OFF)
+option(APP_AS_APK "Will build app as a complete Android APK app" OFF)
 
 set(ANIRA_WITH_TFLITE OFF)
 set(ANIRA_WITH_LIBTORCH OFF)
@@ -18,7 +19,13 @@ include(cmake/magic_enum.cmake)
 include(cmake/nlohmann_json.cmake)
 include(cmake/boost_pfr.cmake)
 
-add_executable(${PROJECT_NAME} ${SOURCE_FILES})
+if(NOT APP_AS_APK)
+    add_executable(${PROJECT_NAME} ${SOURCE_FILES})
+else()
+    add_compile_definitions(APP_AS_APK)
+    add_library(${PROJECT_NAME} SHARED ${SOURCE_FILES})
+    target_link_libraries(${PROJECT_NAME} PRIVATE log)
+endif()
 
 target_include_directories(
     ${PROJECT_NAME}

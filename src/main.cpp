@@ -36,8 +36,7 @@ int runApp(const cxxopts::ParseResult&     args,
     return EXIT_SUCCESS;
 }
 
-int main(int argc, char** argv) {
-    signal(SIGINT, sigint_handler);
+int main_body(int argc, char** argv) {
     cxxopts::Options options{"filtered",
                              "Audio passing through filter program"};
 
@@ -104,4 +103,107 @@ int main(int argc, char** argv) {
                                    gparams,
                                    SupportedInferenceEngines::Anira);
     }
+    return 0;
 }
+
+#ifndef APP_AS_APK
+#pragma message("Compiling for native run")
+int main(int argc, char** argv) {
+    signal(SIGINT, sigint_handler);
+    return main_body(argc, argv);
+}
+#else
+#include <android/log.h>
+#include <jni.h>
+#include <pthread.h>
+#include <unistd.h>
+
+#define TAG "WrapperApp"
+
+static void* stdoutToLogcat(void* arg) {
+    int     fd = (int)(intptr_t)arg;
+    char    buf[1024];
+    ssize_t n;
+    while ((n = read(fd, buf, sizeof(buf) - 1)) > 0) {
+        buf[n] = '\0';
+        __android_log_print(ANDROID_LOG_INFO, TAG, "%s", buf);
+    }
+    return nullptr;
+}
+
+static void redirectStdoutToLogcat() {
+    int pipefd[2];
+    pipe(pipefd);
+
+    // Replace stdout and stderr with the write end of the pipe
+    dup2(pipefd[1], STDOUT_FILENO);
+    dup2(pipefd[1], STDERR_FILENO);
+    close(pipefd[1]);
+
+    // Spawn a thread to read the read end and forward to logcat
+    pthread_t thread;
+    pthread_create(&thread,
+                   nullptr,
+                   stdoutToLogcat,
+                   (void*)(intptr_t)pipefd[0]);
+    pthread_detach(thread);
+}
+
+#pragma message("Compiling for embedding in APK app")
+std::vector<std::string> parseArgs(const std::string& input) {
+    std::vector<std::string> tokens;
+    std::string              current;
+    char                     quoteChar = 0;
+    bool                     inQuote   = false;
+
+    for (size_t i = 0; i < input.size(); ++i) {
+        char c = input[i];
+
+        if (std::isspace(c) && !current.empty()) {
+            tokens.push_back(current);
+            current.clear();
+        } else {
+            current += c;
+        }
+    }
+
+    if (!current.empty()) {
+        tokens.push_back(current);  // last token
+    }
+
+    return tokens;
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_example_wrapperapp_MainActivity_runFiltered(JNIEnv* env,
+                                                     jobject,
+                                                     jstring jargs) {
+    redirectStdoutToLogcat();  // call once before anything else
+    const char* argsStr = env->GetStringUTFChars(jargs, nullptr);
+    std::string argsStdStr(argsStr);
+    env->ReleaseStringUTFChars(jargs, argsStr);
+
+    std::vector<std::string> tokens = parseArgs(argsStdStr);
+
+    std::vector<char*> argv;
+    argv.push_back(const_cast<char*>("filtered"));  // argv[0]
+    for (auto& t : tokens) {
+        argv.push_back(t.data());
+    }
+    int argc = argv.size();
+
+    __android_log_print(ANDROID_LOG_INFO,
+                        TAG,
+                        "Calling main_body() with argc=%d",
+                        argc);
+    for (int i = 0; i < argc; i++) {
+        __android_log_print(ANDROID_LOG_INFO,
+                            TAG,
+                            "  argv[%d] = %s",
+                            i,
+                            argv[i]);
+    }
+
+    main_body(argc, argv.data());
+}
+#endif
