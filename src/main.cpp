@@ -1,4 +1,5 @@
 #include <App.hpp>
+#include <ModelTypes.hpp>
 #include <boost/pfr.hpp>
 #include <nlohmann/json.hpp>
 
@@ -30,9 +31,24 @@ int runApp(const cxxopts::ParseResult&     args,
     fill_params_from_args(params, args["options"].as<std::string>());
 
     gparams.chosen_engine = engine;
-    App app(args, gparams, params, run);
 
-    app.run();
+    if (args["model_type"].as<std::string>() ==
+        magic_enum::enum_name(ModelType::GRU)) {
+        static constexpr int32_t batch_size             = 1;
+        static constexpr int32_t algo_audio_buffer_size = 256;
+        static constexpr int32_t input_size             = 2;
+        static constexpr int32_t hidden_size            = 128;
+        static constexpr int32_t num_layers             = 2;
+        IIRGRUInfo<batch_size,
+                   algo_audio_buffer_size,
+                   input_size,
+                   hidden_size,
+                   num_layers>
+            gru;
+        App app(gru, args, gparams, params, run);
+        app.run();
+    }
+
     return EXIT_SUCCESS;
 }
 
@@ -44,9 +60,10 @@ int main_body(int argc, char** argv) {
         "m,model",
         "File containing the model to load (expected .onnx file)",
         cxxopts::value<std::string>()->default_value("./lowpass_rnn.onnx"))(
-        "f,fc",
-        "Cutoff frequency (Hz)",
-        cxxopts::value<int32_t>())(
+        "t,model_type",
+        "Type of the loaded model (supported : GRU)",
+        cxxopts::value<std::string>()->default_value(
+            "GRU"))("f,fc", "Cutoff frequency (Hz)", cxxopts::value<int32_t>())(
         "p,profiling",
         "Profiling mode : get information about session perfomance (boolean)",
         cxxopts::value<bool>()->default_value("false"))(

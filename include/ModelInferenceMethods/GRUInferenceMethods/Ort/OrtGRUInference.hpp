@@ -1,17 +1,17 @@
 #pragma once
 
-#include <GRUInferenceMethods/GRUInferenceMethodBase.hpp>
-#include <GRUInferenceMethods/GeneralInferenceParams.hpp>
-#include <GRUInferenceMethods/Ort/OrtSessionHandler.hpp>
-#include <GRUInferenceMethods/Ort/OrtTensorBuffer.hpp>
+#include <ModelInferenceMethods/GeneralInferenceParams.hpp>
+#include <ModelInferenceMethods/ModelInferenceMethodBase.hpp>
+#include <ModelInferenceMethods/OrtUtils/OrtSessionHandler.hpp>
+#include <ModelInferenceMethods/OrtUtils/OrtTensorBuffer.hpp>
 
 template <IsIIRGRUInfo IIRGRU>
-class OrtGRUInference final : public GRUInferenceMethodBase<IIRGRU> {
+class OrtGRUInference final : public ModelInferenceMethodBase<IIRGRU> {
    public:
     OrtGRUInference(const IIRGRU&                gru,
                     const GeneralInferenceParams gparams,
                     const OrtParams&             ieparams) :
-        GRUInferenceMethodBase<IIRGRU>(gru, gparams, ieparams),
+        ModelInferenceMethodBase<IIRGRU>(gru, gparams, ieparams),
         m_session_handler{gparams.model_filename,
                           ieparams.EP_name,
                           gparams.debug_mode_on,

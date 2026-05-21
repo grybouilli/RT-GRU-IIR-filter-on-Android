@@ -2,19 +2,19 @@
 
 #include <anira/anira.h>
 
-#include <GRUInferenceMethods/Anira/PrePostGRUProcessor.hpp>
-#include <GRUInferenceMethods/GRUInferenceMethodBase.hpp>
-#include <GRUInferenceMethods/GeneralInferenceParams.hpp>
-#include <GRUInferenceMethods/IEParams.hpp>
+#include <ModelInferenceMethods/GRUInferenceMethods/Anira/PrePostGRUProcessor.hpp>
+#include <ModelInferenceMethods/GeneralInferenceParams.hpp>
+#include <ModelInferenceMethods/IEParams.hpp>
+#include <ModelInferenceMethods/ModelInferenceMethodBase.hpp>
 #include <magic_enum/magic_enum.hpp>
 
 template <IsIIRGRUInfo IIRGRU>
-class AniraGRUInference final : public GRUInferenceMethodBase<IIRGRU> {
+class AniraGRUInference final : public ModelInferenceMethodBase<IIRGRU> {
    public:
     AniraGRUInference(const IIRGRU&                gru,
                       const GeneralInferenceParams gparams,
                       const AniraParams&           ieparams) :
-        GRUInferenceMethodBase<IIRGRU>(gru, gparams, ieparams),
+        ModelInferenceMethodBase<IIRGRU>(gru, gparams, ieparams),
         m_chosen_backend{
             magic_enum::enum_cast<anira::InferenceBackend>(ieparams.backend)
                 .value_or(anira::InferenceBackend::ONNX)},

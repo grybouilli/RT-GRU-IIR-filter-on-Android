@@ -3,9 +3,9 @@
 #include <oboe/Oboe.h>
 
 #include <AudioParams.hpp>
-#include <GRUBinding.hpp>
-#include <GRUInferenceMethods/GeneralInferenceParams.hpp>
-#include <GRUInferenceMethods/IEParams.hpp>
+#include <ModelBinding.hpp>
+#include <ModelInferenceMethods/GeneralInferenceParams.hpp>
+#include <ModelInferenceMethods/IEParams.hpp>
 #include <chrono>
 #include <cmath>
 #include <cstdint>
@@ -16,10 +16,10 @@
 // ---------------------------------------------------------------------------
 // Player
 //   Oboe output callback.  Reads raw audio from SharedAudioBuffer, runs it
-//   through the GRU filter via GRUBinding (zero hot-path allocations), and
+//   through the GRU filter via ModelBinding (zero hot-path allocations), and
 //   writes filtered samples back to Oboe.
 // ---------------------------------------------------------------------------
-template <IsIIRGRUInfo IIRGRU>
+template <typename ModelInfo>
 class Player : public oboe::AudioStreamDataCallback {
    public:
     bool debug;
@@ -27,7 +27,7 @@ class Player : public oboe::AudioStreamDataCallback {
 
    public:
     template <typename IEParams>
-    Player(const IIRGRU&                gru,
+    Player(const ModelInfo&             model,
            const GeneralInferenceParams gparams,
            const IEParams&              ieparams,
            int32_t                      sample_rate,
@@ -38,8 +38,8 @@ class Player : public oboe::AudioStreamDataCallback {
         m_sample_rate{sample_rate},
         m_channels{channels},
         m_buffer{buffer},
-        m_gru_binding{gru, gparams, ieparams},
-        m_expected_frames{static_cast<int32_t>(gru.buffer_size())},
+        m_model_binding{model, gparams, ieparams},
+        m_expected_frames{static_cast<int32_t>(model.buffer_size())},
         debug{dbg},
         profiling{prflg} {}
 
@@ -76,7 +76,7 @@ class Player : public oboe::AudioStreamDataCallback {
                     .count());
         }
         // Run inference - writes filtered samples back into `out` in-place
-        ret = m_gru_binding.run(out, num_samples);
+        ret = m_model_binding.run(out, num_samples);
 
         if (profiling) {
             end = std::chrono::high_resolution_clock::now();
@@ -123,7 +123,7 @@ class Player : public oboe::AudioStreamDataCallback {
     int32_t       m_channels;
     audio_buffer& m_buffer;
 
-    GRUBinding<IIRGRU> m_gru_binding;
+    ModelBinding<ModelInfo> m_model_binding;
 
     int32_t m_expected_frames;
 
