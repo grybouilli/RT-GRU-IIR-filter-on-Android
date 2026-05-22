@@ -56,6 +56,12 @@ class SharedAudioBuffer {
         return chunk;
     }
 
+    size_t size() const {
+        size_t r = m_read_pos.load(std::memory_order_relaxed);
+        size_t w = m_write_pos.load(std::memory_order_acquire);
+        return (w - r + m_capacity) % m_capacity;
+    }
+
    private:
     std::vector<SampleType> m_buffer;
     size_t                  m_capacity;

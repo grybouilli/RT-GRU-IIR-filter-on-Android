@@ -4,6 +4,7 @@
 #include <signal.h>
 
 #include <AudioParams.hpp>
+#include <DSPRunner.hpp>
 #include <IIRGRUInfo.hpp>
 #include <IIRGRUUtils.hpp>
 #include <IOStreamHandler.hpp>
@@ -25,18 +26,18 @@ class App {
         const IEParams&              ieparams,
         std::atomic<bool>&           running) :
         m_running{running},
-        m_audio_buffer{4096},
+        m_input_audio_buffer{4096},
+        m_output_audio_buffer{4096},
         m_stream_handler{},
-        m_recorder{m_stream_handler.get_in_sr(), 1, m_audio_buffer},
+        m_dsp{m_input_audio_buffer,
+              m_output_audio_buffer,
+              model,
+              gparams,
+              ieparams},
+        m_recorder{m_stream_handler.get_in_sr(), 1, m_input_audio_buffer},
         m_model{model},
-        m_player{m_model,
-                 gparams,
-                 ieparams,
-                 m_stream_handler.get_out_sr(),
-                 1,
-                 m_audio_buffer},
-        m_run_duration{-1},
-        m_profiling_output_file{gparams.profiling_file} {
+        m_player{m_stream_handler.get_out_sr(), 1, m_output_audio_buffer},
+        m_run_duration{-1} {
         parse_options(args);
 
         constexpr int32_t dsp_audio_buffer_size = 256;
@@ -54,9 +55,6 @@ class App {
         m_recorder.dump("input.npy");
 
         if (m_player.debug) m_player.dump_debug_output("output.npy");
-        if (m_player.debug) m_player.dump_debug_timestamps("timestamps.npy");
-        if (m_player.profiling)
-            m_player.dump_profiling(m_profiling_output_file);
 
         printf("Done.\n");
     }
@@ -83,12 +81,6 @@ class App {
 
    private:
     void parse_options(const cxxopts::ParseResult& args) {
-        bool profiling = false;
-        if (args.count("profiling") > 0) {
-            profiling = args["profiling"].as<bool>();
-        }
-        printf("Profiling active : %s\n", profiling ? "yes" : "no");
-
         bool debug = false;
         if (args.count("debug") > 0) {
             debug = args["debug"].as<bool>();
@@ -100,19 +92,20 @@ class App {
             printf("Run duration : %d seconds\n", m_run_duration);
         }
 
-        m_player.debug     = debug;
-        m_player.profiling = profiling;
+        m_player.debug = debug;
     }
 
    private:
     std::atomic<bool>& m_running;
 
-    audio_buffer    m_audio_buffer;
+    audio_buffer    m_input_audio_buffer;
+    audio_buffer    m_output_audio_buffer;
     IOStreamHandler m_stream_handler;
 
-    Recorder          m_recorder;
-    ModelInfo         m_model;
-    Player<ModelInfo> m_player;
-    int               m_run_duration;
-    std::string       m_profiling_output_file;
+    DSPRunner<ModelInfo> m_dsp;
+
+    Recorder  m_recorder;
+    ModelInfo m_model;
+    Player    m_player;
+    int       m_run_duration;
 };
