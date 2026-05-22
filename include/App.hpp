@@ -40,16 +40,18 @@ class App {
         m_run_duration{-1} {
         parse_options(args);
 
-        constexpr int32_t dsp_audio_buffer_size = 256;
+        constexpr int32_t dsp_input_audio_buffer_size  = 256;
+        constexpr int32_t dsp_output_audio_buffer_size = 512;
         m_stream_handler.m_in_builder.setDataCallback(&m_recorder)
             ->setSampleRate(m_stream_handler.get_in_sr())
-            ->setFramesPerCallback(dsp_audio_buffer_size);
+            ->setFramesPerCallback(dsp_input_audio_buffer_size);
 
         m_stream_handler.m_out_builder.setDataCallback(&m_player)
             ->setSampleRate(m_stream_handler.get_out_sr())
-            ->setFramesPerCallback(dsp_audio_buffer_size);
+            ->setFramesPerCallback(dsp_output_audio_buffer_size);
 
-        m_stream_handler.create_streams(dsp_audio_buffer_size);
+        m_stream_handler.create_streams(dsp_input_audio_buffer_size,
+                                        dsp_output_audio_buffer_size);
     }
     ~App() {
         m_recorder.dump("input.npy");

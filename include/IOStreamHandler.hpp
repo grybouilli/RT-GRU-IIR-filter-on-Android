@@ -32,7 +32,8 @@ class IOStreamHandler {
     const int32_t& get_in_sr() const { return m_in_sr; }
     const int32_t& get_out_sr() const { return m_out_sr; }
 
-    bool create_streams(const int32_t audio_buffer_size) {
+    bool create_streams(const int32_t input_buffer_size,
+                        const int32_t output_buffer_size) {
         auto result = m_in_builder.openManagedStream(m_instream);
         if (result != oboe::Result::OK) {
             fprintf(stderr,
@@ -50,9 +51,9 @@ class IOStreamHandler {
         }
 
         auto in_buf_result =
-            m_instream->setBufferSizeInFrames(audio_buffer_size);
+            m_instream->setBufferSizeInFrames(input_buffer_size);
         auto out_buf_result =
-            m_outstream->setBufferSizeInFrames(audio_buffer_size);
+            m_outstream->setBufferSizeInFrames(output_buffer_size);
 
         if (in_buf_result) {
             printf("Input buffer size: %d frames\n", in_buf_result.value());
@@ -72,6 +73,10 @@ class IOStreamHandler {
         }
 
         return true;
+    }
+
+    bool create_streams(const int32_t audio_buffer_size) {
+        return create_streams(audio_buffer_size, audio_buffer_size);
     }
 
     bool start_streams() {
