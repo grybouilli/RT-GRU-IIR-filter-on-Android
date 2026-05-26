@@ -40,8 +40,18 @@ class App {
         m_run_duration{-1} {
         parse_options(args);
 
+        constexpr int32_t est_warmup_time = 50;  // ms
+        for (auto wub = 0; wub < gparams.warm_up_buffers; ++wub) {
+            constexpr std::array<audio_sample_t, model.buffer_size()>
+                empty_buffer{0};
+            m_input_audio_buffer.write(empty_buffer.data(),
+                                       empty_buffer.size());
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(
+            est_warmup_time * gparams.warm_up_buffers));
+
         constexpr int32_t dsp_input_audio_buffer_size  = 256;
-        constexpr int32_t dsp_output_audio_buffer_size = 512;
+        constexpr int32_t dsp_output_audio_buffer_size = 256;
         m_stream_handler.m_in_builder.setDataCallback(&m_recorder)
             ->setSampleRate(m_stream_handler.get_in_sr())
             ->setFramesPerCallback(dsp_input_audio_buffer_size);

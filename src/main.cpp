@@ -87,7 +87,10 @@ int main_body(int argc, char** argv) {
         "Ort -> {\"EP_name\": string, \"EP_options\" : null|dict }\n"
         "Anira -> {\"backend\": ONNX, \"model_latency\": float }\n",
         cxxopts::value<std::string>()->default_value(
-            R"({"EP_name": "XNNPACK" })"));
+            R"({"EP_name": "XNNPACK" })"))(
+        "w,warmup_buffers",
+        "Amount of warm-up buffers (unsigned int)",
+        cxxopts::value<size_t>()->default_value("0"));
 
     auto args = options.parse(argc, argv);
 
@@ -101,7 +104,9 @@ int main_body(int argc, char** argv) {
     gparams.debug_mode_on  = args["debug"].as<bool>();
     gparams.Fc_normed =
         normalize_frequency((float)args["fc"].as<int32_t>(), 48000.f);
-    gparams.profiling_file = args["profiling_data"].as<std::string>();
+    gparams.profiling       = args["profiling"].as<bool>();
+    gparams.profiling_file  = args["profiling_data"].as<std::string>();
+    gparams.warm_up_buffers = args["warmup_buffers"].as<size_t>();
 
     std::cout << std::format("normed cut off freq = {}", gparams.Fc_normed)
               << std::endl;
