@@ -34,15 +34,15 @@ class OrtConvTasNetInference final
         m_downsampler{(double)convtasnet.sample_rate() /
                       gparams.dsp_sample_rate},
         m_upsampler{(double)gparams.dsp_sample_rate / convtasnet.sample_rate()},
-        m_selected_out_channel{0} {
+        m_selected_out_channel{0} {}
+
+    bool run(float* audio, const size_t num_samples) override {
+        const auto expected_ds_size = prepare_input(audio, num_samples);
+
         m_binding.ClearBoundInputs();
         m_binding.ClearBoundOutputs();
         m_binding.BindInput("input", m_x_data.tensor);
         m_binding.BindOutput("output", m_output.tensor);
-    }
-
-    bool run(float* audio, const size_t num_samples) override {
-        const auto expected_ds_size = prepare_input(audio, num_samples);
 
         m_session_handler.session().Run(Ort::RunOptions{nullptr}, m_binding);
 
