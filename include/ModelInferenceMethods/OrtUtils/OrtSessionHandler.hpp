@@ -48,7 +48,7 @@ class OrtSessionHandler {
                       << std::endl;
         }
 
-        m_session_options.SetIntraOpNumThreads(1);
+        m_session_options.SetIntraOpNumThreads(0);
         m_session_options.SetGraphOptimizationLevel(
             GraphOptimizationLevel::ORT_ENABLE_ALL);
         m_session_options.SetLogSeverityLevel(0);
