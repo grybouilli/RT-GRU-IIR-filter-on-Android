@@ -16,11 +16,11 @@ option(APP_AS_APK "Will build app as a complete Android APK app" OFF)
 
 set(ANIRA_WITH_TFLITE OFF)
 set(ANIRA_WITH_LIBTORCH OFF)
-set(LIBONNXRUNTIME_VERSION 1.24.1)
-add_subdirectory(modules/anira)
+set(LIBONNXRUNTIME_VERSION 1.29.0) # minimum required is 1.28.0 to get PR #28733 and 1.29.0 to get PR #30512
 
-include(cmake/liboboe.cmake)
 include(cmake/DynamicONNXRuntime.cmake)
+add_subdirectory(modules/anira)
+include(cmake/liboboe.cmake)
 include(cmake/cxxopts.cmake)
 include(cmake/magic_enum.cmake)
 include(cmake/nlohmann_json.cmake)
@@ -74,7 +74,7 @@ target_link_libraries(
     PRIVATE magic_enum::magic_enum
     PRIVATE nlohmann_json::nlohmann_json
     PRIVATE Boost::pfr
-    PRIVATE ${CMAKE_SOURCE_DIR}/modules/libonnxruntime.so
+    PRIVATE ${ONXX_RT_SRC_DIR}/jni/arm64-v8a/libonnxruntime.so
     PRIVATE SampleRate::samplerate
     PRIVATE sndfile 
     PRIVATE fftw3
@@ -95,7 +95,7 @@ target_link_libraries(
     PRIVATE magic_enum::magic_enum
     PRIVATE nlohmann_json::nlohmann_json
     PRIVATE Boost::pfr
-    PRIVATE ${CMAKE_SOURCE_DIR}/modules/libonnxruntime.so
+    PRIVATE ${ONXX_RT_SRC_DIR}/jni/arm64-v8a/libonnxruntime.so
     PRIVATE SampleRate::samplerate
     PRIVATE sndfile 
     PRIVATE fftw3
@@ -116,7 +116,7 @@ target_link_libraries(
     PRIVATE magic_enum::magic_enum
     PRIVATE nlohmann_json::nlohmann_json
     PRIVATE Boost::pfr
-    PRIVATE ${CMAKE_SOURCE_DIR}/modules/libonnxruntime.so
+    PRIVATE ${ONXX_RT_SRC_DIR}/jni/arm64-v8a/libonnxruntime.so
     PRIVATE SampleRate::samplerate
     PRIVATE sndfile 
     PRIVATE fftw3
