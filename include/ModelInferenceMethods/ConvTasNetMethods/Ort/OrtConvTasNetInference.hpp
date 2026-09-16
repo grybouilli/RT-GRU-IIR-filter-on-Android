@@ -7,7 +7,6 @@
 #include <ModelInferenceMethods/OrtUtils/OrtSessionHandler.hpp>
 #include <ModelInferenceMethods/OrtUtils/OrtTensorBuffer.hpp>
 #include <Resampler.hpp>
-#include <SoundFileWriter.hpp>
 #include <array>
 
 template <IsConvTasNetInfo ConvTasNet>
@@ -35,78 +34,20 @@ class OrtConvTasNetInference final
         m_downsampler{(double)convtasnet.sample_rate() /
                       gparams.dsp_sample_rate},
         m_upsampler{(double)gparams.dsp_sample_rate / convtasnet.sample_rate()},
-        m_selected_out_channel{0}
-#ifdef OFFLINE_INFERENCES
-        ,
-        m_filtered_outfile_chan0{
-            std::format("{}_filtered_output_chan0_from_{}_to_{}khz.wav",
-                        gparams.model_filename,
-                        gparams.dsp_sample_rate,
-                        convtasnet.sample_rate()),
-            convtasnet.sample_rate(),
-            1},
-        m_filtered_outfile_chan1{
-            std::format("{}_filtered_output_chan1_from_{}_to_{}khz.wav",
-                        gparams.model_filename,
-                        gparams.dsp_sample_rate,
-                        convtasnet.sample_rate()),
-            convtasnet.sample_rate(),
-            1}
-#endif
-    {
+        m_selected_out_channel{0} {
+        m_binding.ClearBoundInputs();
+        m_binding.ClearBoundOutputs();
+        m_binding.BindInput("input", m_x_data.tensor);
+        m_binding.BindOutput("output", m_output.tensor);
     }
 
     bool run(float* audio, const size_t num_samples) override {
-        static const size_t B = static_cast<size_t>(ConvTasNet::buffer_size());
-        const auto          samples = std::min(num_samples, B);
-        const size_t        expected_ds_size =
-            (int)(m_downsampler.get_ratio() * samples);
-
-        std::shift_left(m_x_data.buffer_memory.begin(),
-                        m_x_data.buffer_memory.end(),
-                        expected_ds_size);  // discard the oldest buffer
-
-        float* latest_input_buffer = m_x_data.buffer_memory.data() +
-                                     m_x_data.buffer_memory.size() -
-                                     expected_ds_size;
-        auto   ds_frames           = m_downsampler.resample(audio,
-                                                            num_samples,
-                                                            latest_input_buffer,
-                                                            expected_ds_size);
-        m_binding.ClearBoundInputs();
-        m_binding.BindInput("input", m_x_data.tensor);
-
-        m_binding.ClearBoundOutputs();
-        m_binding.BindOutput("output", m_output.tensor);
+        const auto expected_ds_size = prepare_input(audio, num_samples);
 
         m_session_handler.session().Run(Ort::RunOptions{nullptr}, m_binding);
 
-        const auto offset = (m_selected_out_channel + 1) * B - ds_frames;
-#ifdef OFFLINE_INFERENCES
-        m_filtered_outfile_chan0.write(m_output.buffer_memory.data() + offset,
-                                       ds_frames);
-        const auto offset2 =
-            (((m_selected_out_channel + 1) % 2) + 1) * B - ds_frames;
-        m_filtered_outfile_chan1.write(m_output.buffer_memory.data() + offset2,
-                                       ds_frames);
-#endif  // OFFLINE_INFERENCES
-        std::vector<float> upsampled_voices(samples);
-        auto               gen_frames =
-            m_upsampler.resample(m_output.buffer_memory.data() + offset,
-                                 ds_frames,
-                                 upsampled_voices.data(),
-                                 upsampled_voices.size());
+        transfer_output(audio, num_samples, expected_ds_size);
 
-        const auto upsampled_frames = std::min((int)samples, gen_frames);
-
-        std::memset(
-            audio,
-            0,
-            samples *
-                sizeof(float));  // DEBUG : check if output is not just input
-        for (auto sample = 0; sample < upsampled_frames; ++sample) {
-            *(audio + sample) = upsampled_voices[sample];
-        }
         return true;  // TODO: return the amount of treated samples
     }
 
@@ -119,7 +60,86 @@ class OrtConvTasNetInference final
         m_selected_out_channel = channel % 2;
     }
 
+    void toggle_resampling(const bool activate) {
+        m_resample_activated = activate;
+    }
+
    private:
+    /**
+     * @brief Transfers \p audio in the input buffer, after resampling it if
+     * needed.
+     *
+     * @param audio
+     * @param num_samples
+     * @return * size_t The amount of new samples entering the network
+     */
+    size_t prepare_input(float* audio, const size_t num_samples) {
+        static const size_t B = static_cast<size_t>(ConvTasNet::buffer_size());
+        const auto          samples = std::min(num_samples, B);
+        const size_t        expected_ds_size =
+            m_resample_activated ? (int)(m_downsampler.get_ratio() * samples)
+                                 : samples;
+        // x_data contains a buffer the size of the model's input.
+        // it will thus contain older, already seen buffers
+        // here we shift left the content of the buffer, discarding the oldest
+        // buffer
+        std::shift_left(m_x_data.buffer_memory.begin(),
+                        m_x_data.buffer_memory.end(),
+                        expected_ds_size);  // discard the oldest buffer
+
+        float* latest_input_buffer = m_x_data.buffer_memory.data() +
+                                     m_x_data.buffer_memory.size() -
+                                     expected_ds_size;
+        int    ds_frames;
+        // we copy the current buffer in the last slot of x_data either when
+        // resampling, or directly if resampling is deactivated
+        if (m_resample_activated) {
+            ds_frames = m_downsampler.resample(audio,
+                                               num_samples,
+                                               latest_input_buffer,
+                                               expected_ds_size);
+        } else {
+            ds_frames = expected_ds_size;
+            std::memcpy(latest_input_buffer,
+                        audio,
+                        expected_ds_size * sizeof(float));
+        }
+
+        return ds_frames;
+    }
+
+    void transfer_output(float*       audio,
+                         const size_t samples,
+                         const size_t ds_frames) {
+        static const size_t B = static_cast<size_t>(ConvTasNet::buffer_size());
+        // -- Post inference process
+        // Locate the last buffer in the output, which like the input, contains
+        // old data
+        const auto offset = (m_selected_out_channel + 1) * B - ds_frames;
+        if (m_resample_activated) {
+            std::vector<float> upsampled_voices(samples);
+            auto               gen_frames =
+                m_upsampler.resample(m_output.buffer_memory.data() + offset,
+                                     ds_frames,
+                                     upsampled_voices.data(),
+                                     upsampled_voices.size());
+            const auto upsampled_frames = std::min((int)samples, gen_frames);
+
+            std::memset(
+                audio,
+                0,
+                samples *
+                    sizeof(
+                        float));  // DEBUG : check if output is not just input
+            for (auto sample = 0; sample < upsampled_frames; ++sample) {
+                *(audio + sample) = upsampled_voices[sample];
+            }
+        } else {
+            std::memcpy(audio,
+                        m_output.buffer_memory.data() + offset,
+                        sizeof(float) * ds_frames);
+        }
+    }
     OrtSessionHandler m_session_handler;
 
     Ort::MemoryInfo m_memory_info;
@@ -130,10 +150,7 @@ class OrtConvTasNetInference final
 
     Resampler<1> m_downsampler;
     Resampler<2> m_upsampler;
+    bool         m_resample_activated;
 
     size_t m_selected_out_channel;
-#ifdef OFFLINE_INFERENCES
-    SoundFileWriter<float, SF_FORMAT_WAV> m_filtered_outfile_chan0;
-    SoundFileWriter<float, SF_FORMAT_WAV> m_filtered_outfile_chan1;
-#endif
 };
