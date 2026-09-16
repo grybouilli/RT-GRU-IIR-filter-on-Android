@@ -3,9 +3,9 @@ project(filtered LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 20)            
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fdiagnostics-color=always")
-set(SOURCE_FILES src/main.cpp src/acquire_audio_stream.cpp)
-set(GET_OPT_MODEL_SRC_FILES src/get_optimized_model.cpp)
-set(OFFLINE_INFERENCE_SRC_FILES src/offline_inferences.cpp)
+set(SOURCE_FILES src/main.cpp src/acquire_audio_stream.cpp src/utils.cpp)
+set(GET_OPT_MODEL_SRC_FILES src/get_optimized_model.cpp src/utils.cpp)
+set(OFFLINE_INFERENCE_SRC_FILES src/offline_inferences.cpp src/utils.cpp)
 
 set(GET_OPT_MODEL_BIN get_opt_model)
 set(OFFLINE_INFERENCE_3SEC offline_inference_3sec)

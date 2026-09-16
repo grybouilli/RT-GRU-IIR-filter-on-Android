@@ -17,10 +17,10 @@ auto get_options() {
         "File containing the model to load (expected .onnx file)",
         cxxopts::value<std::string>()->default_value("./lowpass_rnn.onnx"))(
         "t,model_type",
-        "Type of the loaded model (supported : GRU)",
-        cxxopts::value<std::string>()->default_value("GRU"))(
+        "Type of the loaded model (supported : GRU, ConvTasNet)",
+        cxxopts::value<std::string>()->default_value("ConvTasNet"))(
         "f,fc",
-        "Cutoff frequency (Hz)",
+        "Cutoff frequency (Hz) - Needed for GRU model",
         cxxopts::value<int32_t>()->default_value("150"))(
         "p,profiling",
         "Profiling mode : get information about session perfomance (boolean)",
@@ -52,7 +52,7 @@ auto get_options() {
         cxxopts::value<size_t>()->default_value("0"))(
         "s,dsp_sample_rate",
         "DSP sample rate (unsigned int)",
-        cxxopts::value<int64_t>()->default_value("48000"))(
+        cxxopts::value<int>()->default_value("48000"))(
         "b,buffer_size",
         "Buffer size (unsigned int)",
         cxxopts::value<int>()->default_value("252"))(
@@ -96,8 +96,10 @@ void fill_gparams_from_args(GeneralInferenceParams&     params,
         }
     });
 
-    params.Fc_normed =
-        normalize_frequency((float)args["fc"].as<int32_t>(), 48000.f);
+    if (args["t"].as<std::string>() == "GRU") {
+        params.Fc_normed =
+            normalize_frequency((float)args["fc"].as<int32_t>(), 48000.f);
+    }
 
     auto chosen_engine = magic_enum::enum_cast<SupportedInferenceEngines>(
         args["inference_engine"].as<std::string>());

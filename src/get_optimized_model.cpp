@@ -1,3 +1,21 @@
+/**
+ * @file get_optimized_model.cpp
+ * @author Nicolas Gry (nicolas.gry@madic.com)
+ * @brief
+ * @version 0.1
+ * @date 2026-09-07
+ *
+ * @copyright Copyright (c) 2026
+ *
+ * @details
+ * This program generates a compiled model. The generated model filename will
+ * be: <ep_option_basename>_<model_filename>.onnx and will be put either in the
+ * current working directory or in the directory passed with the flag --ctx_dest
+ * <dir>
+ *
+ * So far, this has been mainly used to export models optimized for the HTP
+ * with ONNX's QNN EP on Samsung S23.
+ */
 #include <sndfile.h>
 
 #include <ModelInferenceMethods/ConvTasNetMethods/Ort/OrtConvTasNetInference.hpp>
@@ -9,6 +27,7 @@
 #include <npy.hpp>
 #include <parsing_utils.hpp>
 #include <random>
+#include <utils.hpp>
 
 using json = nlohmann::json;
 
@@ -33,11 +52,9 @@ int main(int argc, char** argv) {
     fill_ie_params_from_args(ort_params, args["options"].as<std::string>());
 
     // Find loaded model filename and folder
-    const std::string current_model_folder =
-        gparams.model_filename.substr(0,
-                                      gparams.model_filename.find_last_of("/"));
-    const std::string current_model_basename = gparams.model_filename.substr(
-        gparams.model_filename.find_last_of("/") + 1);
+    const std::string current_model_folder = get_folder(gparams.model_filename);
+    const std::string current_model_basename =
+        get_file_basename(gparams.model_filename);
     std::string compiled_model_filename = current_model_basename;
     std::string ep_opt_json_file        = "";
     // add ep options if provided by user
@@ -52,25 +69,26 @@ int main(int argc, char** argv) {
 
         ort_params.EP_options = ep_options;
 
-        const std::string base_filename =
-            ep_options_json.substr(ep_options_json.find_last_of("/") + 1);
-        std::string::size_type const p(base_filename.find_last_of('.'));
-        const std::string file_without_extension = base_filename.substr(0, p);
+        const std::string base_filename = get_file_basename(ep_options_json);
+        const std::string file_without_extension =
+            get_file_basename_no_ext(base_filename);
 
         compiled_model_filename =
             file_without_extension + "_" + current_model_basename;
         ep_opt_json_file = file_without_extension;
     }
 
+    // Handle destination output folder
     if (const auto dest_ctx_folder = args["ctx_dest"].as<std::string>();
         dest_ctx_folder != "") {
         compiled_model_filename =
             dest_ctx_folder + "/" + compiled_model_filename;
     } else {
         compiled_model_filename =
-            current_model_folder + compiled_model_filename;
+            current_model_folder + "/" + compiled_model_filename;
     }
 
+    // Set-up profiling if enabled
     if (ort_params.EP_options.contains("profiling_level")) {
         ort_params.EP_options["profiling_file_path"] =
             "logs/" + ep_opt_json_file + "_" + current_model_basename + ".csv";
@@ -78,6 +96,7 @@ int main(int argc, char** argv) {
                   << ort_params.EP_options["profiling_file_path"] << std::endl;
     }
 
+    // enables ep context when ort_json_config_entries is not provided
     if (const auto config_entries_json =
             args["ort_json_config_entries"].as<std::string>();
         config_entries_json != "") {
